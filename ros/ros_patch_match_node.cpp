@@ -146,8 +146,8 @@ void PatchMatch::initAnnCPU(cv::Mat& ann, cv::Mat& annd,const cv::Mat& source,
 
 cv::Mat PatchMatch::reconstructImageCPU(const cv::Mat& source, const cv::Mat& target,const cv::Mat& ann)
 {
-    cv::Mat source_recon;
-#pragma omp parallel for schedule(static)
+    cv::Mat source_recon(source.size(), CV_8UC3, cv::Scalar(0));
+// #pragma omp parallel for schedule(static)
     for (int sy = 0; sy < source.rows; sy++) {
         for (int sx = 0; sx < source.cols; sx++)
         {
@@ -185,13 +185,13 @@ bool PatchMatch::patchMatchCallback(ros_patch_match::PatchMatchService::Request&
     ///CPU
     cv::Mat ann,annd;
     int half_patch_size = req.patch_size/2; //should be odd
-
     if(bool(req.use_gpu)==0)
     {
         ROS_INFO("PatchMatch CPU Version");
         auto start=std::chrono::system_clock::now();
         initAnnCPU(ann,annd,source,target,req.patch_size);
-#pragma omp parallel for schedule(static)
+        ROS_INFO("Prepare to start");
+// #pragma omp parallel for schedule(static)
         for(int iter=0;iter< req.iters;iter++)
         {
             //Forward search: UP and LEFT
@@ -247,6 +247,7 @@ bool PatchMatch::patchMatchCallback(ros_patch_match::PatchMatchService::Request&
             }
         }
         cv::Mat reconstructed_image = reconstructImageCPU(source,target,ann);
+        ROS_INFO("Finish computing");
         cv::Mat ann_map = ann2imageCPU(ann);
         cv::imwrite(req.reconstructed_image_file+"cpu_reconstructed_image.png",reconstructed_image);
         cv::imwrite(req.ann_file+"cpu_ann_map.png",ann_map);

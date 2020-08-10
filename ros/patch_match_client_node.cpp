@@ -16,8 +16,8 @@ int main(int argc, char** argv)
 
     ros_patch_match::PatchMatchService srv;
     srv.request.iters = 5;
-    srv.request.use_gpu = true;
-    srv.request.patch_size = 7;
+    srv.request.use_gpu = false;
+    srv.request.patch_size = 3;
 
 
     std::vector<cv::String> source_files,target_files;
@@ -26,8 +26,8 @@ int main(int argc, char** argv)
     // Get all jpg in the folder
     cv::glob(data_path+"*.jpg",source_files);
 
-    srv.request.source_file = data_path+"00000.jpg";
-    srv.request.target_file = data_path+"00001.jpg";
+    srv.request.source_file = data_path+"se.png";
+    srv.request.target_file = data_path+"semask.png";
     srv.request.ann_file = data_path+"ann.txt";
     //srv.request.reconstructed_image_file = data_path+ss.str();
     client.waitForExistence();
